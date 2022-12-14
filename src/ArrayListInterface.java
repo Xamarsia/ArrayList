@@ -1,17 +1,18 @@
+import java.io.Serializable;
 import java.util.Iterator;
 
-public interface ArrayListInterface<Type> extends Iterable<Type> {
+public interface ArrayListInterface<Type extends Serializable> extends Serializable, Iterable<Type> {
 
-    public int size();
+    int size();
 
-    public Type get(int index) throws IndexOutOfBoundsException;
+    Type get(int index) throws IndexOutOfBoundsException;
 
-    public void add(Type value);
+    void add(Type value);
 
-    public boolean contains(Object object);
+    boolean contains(Object object);
 
-    public Type remove(int index) throws IndexOutOfBoundsException;;
+    Type remove(int index) throws IndexOutOfBoundsException;
 
     @Override
-    public Iterator<Type> iterator();
+    Iterator<Type> iterator();
 }

@@ -1,6 +1,14 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 
-public class ArrayList<Type> implements ArrayListInterface<Type> {
+public class ArrayList<Type extends Serializable> implements ArrayListInterface<Type> {
+
+    private static final long serialVersionUID = 7526472295622776147L;
+
+
     private int capacity = 10;
     private int size = 0;
 
@@ -28,24 +36,25 @@ public class ArrayList<Type> implements ArrayListInterface<Type> {
         }
     }
 
-    public static class ArrayIterator<Type> implements Iterator<Type> {
-        int currentIndex = 0;
-        ArrayList<Type> array;
+    private void writeObject(ObjectOutputStream oos)
+            throws IOException {
+        oos.defaultWriteObject();
+        oos.writeInt(size);
 
-        public ArrayIterator(ArrayList<Type> array) {
-            this.array = array;
+        for (int i = 0; i < size; i++) {
+            oos.writeObject(content[i]);
         }
+    }
 
-        @Override
-        public boolean hasNext() {
-            return currentIndex < array.size();
-        }
+    private void readObject(ObjectInputStream ois)
+            throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
 
-        @Override
-        public Type next() {
-            Type value = array.get(currentIndex);
-            ++currentIndex;
-            return value;
+        Integer size = ois.readInt();
+
+        for (int i = 0; i < size; i++) {
+            Type value = (Type) ois.readObject();
+            this.add(value);
         }
     }
 
@@ -112,10 +121,29 @@ public class ArrayList<Type> implements ArrayListInterface<Type> {
     private void grow() {
         Object[] newContent = new Object[capacity * 2];
         capacity *= 2;
-        for (int i = 0; i < size; i++) {
-            newContent[i] = content[i];
-        }
+        if (size >= 0) System.arraycopy(content, 0, newContent, 0, size);
         content = newContent;
+    }
+
+    public static class ArrayIterator<Type extends Serializable> implements Iterator<Type> {
+        int currentIndex = 0;
+        transient ArrayList<Type> array;
+
+        public ArrayIterator(ArrayList<Type> array) {
+            this.array = array;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < array.size();
+        }
+
+        @Override
+        public Type next() {
+            Type value = array.get(currentIndex);
+            ++currentIndex;
+            return value;
+        }
     }
 }
 
